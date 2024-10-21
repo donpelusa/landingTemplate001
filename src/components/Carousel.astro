@@ -1,0 +1,136 @@
+---
+import catalog from "@assets/catalog.json";
+---
+
+<section class="carousel-container mx-auto max-w-7xl px-4 w-full">
+  <div class="carousel">
+    {
+      catalog
+        .filter((item) => item.image) // Filtrar elementos sin imagen
+        .concat(
+          catalog.filter((item) => item.image) // Duplicar elementos para el carrusel infinito
+        )
+        .map((item, index) => {
+          return (
+            <img
+              src={item.image}
+              alt={item.name}
+              class="carousel-image shadow-md"
+              data-id={item.id}
+            />
+          );
+        })
+    }
+  </div>
+</section>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const carousel = document.querySelector(".carousel");
+    const images = document.querySelectorAll(".carousel-image");
+
+    // Obtener o inicializar el mapa de proporciones
+    let proportions = sessionStorage.getItem("imageProportions");
+    if (proportions) {
+      proportions = JSON.parse(proportions);
+    } else {
+      proportions = {};
+    }
+
+    // Asignar proporciones a las imágenes y aplicarlas
+    images.forEach((image) => {
+      const id = image.getAttribute("data-id");
+      let proportion = proportions[id];
+
+      if (!proportion) {
+        // Asignar una proporción aleatoria: square, vertical-rectangle, horizontal-rectangle
+        const options = [
+          "square",
+          "vertical-rectangle",
+          "horizontal-rectangle",
+        ];
+        proportion = options[Math.floor(Math.random() * options.length)];
+        proportions[id] = proportion;
+      }
+
+      image.classList.add(proportion);
+    });
+
+    // Guardar las proporciones en sessionStorage
+    sessionStorage.setItem("imageProportions", JSON.stringify(proportions));
+
+    // Efecto de hover
+    images.forEach((image) => {
+      image.addEventListener("mouseenter", () => {
+        carousel.classList.add("dim");
+        image.classList.add("highlight");
+      });
+      image.addEventListener("mouseleave", () => {
+        carousel.classList.remove("dim");
+        image.classList.remove("highlight");
+      });
+    });
+
+    // Implementar carrusel infinito
+    let scrollAmount = 0;
+    const scrollSpeed = 0.2; // Ajusta la velocidad del carrusel
+    const carouselWidth = carousel.scrollWidth / 2;
+
+    function scrollCarousel() {
+      scrollAmount += scrollSpeed;
+      if (scrollAmount >= carouselWidth) {
+        scrollAmount = 0;
+      }
+      carousel.style.transform = `translateX(-${scrollAmount}px)`;
+      requestAnimationFrame(scrollCarousel);
+    }
+
+    requestAnimationFrame(scrollCarousel);
+  });
+</script>
+
+<style>
+  .carousel-container {
+    overflow: hidden;
+  }
+
+  .carousel {
+    display: flex;
+    overflow: visible; /* Permite que las imágenes agrandadas se muestren fuera del carrusel */
+  }
+
+  .carousel-image {
+    flex: 0 0 auto;
+    margin: 10px;
+    transition:
+      filter 0.3s,
+      transform 0.3s;
+    object-fit: cover;
+    height: 200px; /* Altura fija para todas las imágenes */
+    border-radius: 5%;
+    position: relative;
+    transform-origin: center center;
+  }
+
+  .carousel-image.square {
+    width: 200px;
+  }
+
+  .carousel-image.vertical-rectangle {
+    width: 150px;
+  }
+
+  .carousel-image.horizontal-rectangle {
+    width: 250px;
+  }
+
+  .carousel.dim .carousel-image {
+    filter: brightness(50%);
+  }
+
+  .carousel.dim .carousel-image.highlight {
+    filter: brightness(100%);
+    transform: scale(1.1); /* Agranda la imagen en escala de su tamaño */
+    z-index: 2; /* Asegura que la imagen agrandada esté por encima de las demás */
+  }
+</style>
