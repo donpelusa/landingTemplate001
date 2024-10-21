@@ -23,9 +23,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "20"
-          cache: "npm"
 
-      # Instala las dependencias con pnpm
+      # Instala las dependencias con npm
       - name: Install dependencies
         run: npm install
 
