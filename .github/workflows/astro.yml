@@ -23,19 +23,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "20"
-          cache: "pnpm"
-
-      # Instalar pnpm
-      - name: Install pnpm
-        run: npm install -g pnpm
+          cache: "npm"
 
       # Instala las dependencias con pnpm
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
 
       # Construye el proyecto Astro
       - name: Build Astro
-        run: pnpm run build
+        run: npm run build
 
       # Carga el artefacto generado en la carpeta 'dist'
       - name: Upload artifact
